@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
+import { useAdminData } from '../contexts/AdminDataContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -21,83 +22,72 @@ const getAuthHeaders = () => ({
 
 // Admin Dashboard Component
 export const AdminPanel = () => {
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [selectedTab, setSelectedTab] = useState('dashboard');
   
-  // Track which data has been fetched to avoid refetching
-  const [dataFetched, setDataFetched] = useState({
-    products: false,
-    orders: false,
-    users: false,
-    reviews: false
-  });
+  // ✅ Use centralized admin data context (Prevents duplicate API calls!)
+  const {
+    products,
+    orders,
+    users,
+    reviews,
+    loading,
+    fetchProducts,
+    fetchOrders,
+    fetchUsers,
+    fetchReviews,
+    dataFetched,
+    refreshData
+  } = useAdminData();
 
-  // Fetch initial data (products and orders) on component mount
+  // Fetch initial data on component mount
   useEffect(() => {
-    fetchProducts();
-    fetchOrders();
+    // Only fetch if not already fetched
+    if (!dataFetched.products) {
+      fetchProducts();
+    }
+    if (!dataFetched.orders) {
+      fetchOrders();
+    }
   }, []);
 
-  // Fetch data on-demand when tab is selected (only if not already fetched)
+  // ✅ Fetch data on-demand when tab changes (only if not already fetched)
   useEffect(() => {
-    if (selectedTab === 'users' && !dataFetched.users) {
-      fetchUsers();
-    } else if (selectedTab === 'reviews' && !dataFetched.reviews) {
-      fetchReviews();
+    console.log(`📍 Tab changed to: ${selectedTab}`);
+    
+    switch (selectedTab) {
+      case 'users':
+        if (!dataFetched.users) {
+          console.log('🔄 Fetching users...');
+          fetchUsers();
+        } else {
+          console.log('✅ Users already cached');
+        }
+        break;
+      case 'reviews':
+        if (!dataFetched.reviews) {
+          console.log('🔄 Fetching reviews...');
+          fetchReviews();
+        } else {
+          console.log('✅ Reviews already cached');
+        }
+        break;
+      case 'products':
+        if (!dataFetched.products) {
+          fetchProducts();
+        }
+        break;
+      case 'orders':
+        if (!dataFetched.orders) {
+          fetchOrders();
+        }
+        break;
+      default:
+        // Dashboard tab doesn't need extra fetches
+        break;
     }
   }, [selectedTab, dataFetched]);
 
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`${API}/products`);
-      setProducts(response.data);
-      setDataFetched(prev => ({ ...prev, products: true }));
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to fetch products');
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const response = await axios.get(`${API}/orders`, {
-        headers: getAuthHeaders()
-      });
-      setOrders(response.data);
-      setDataFetched(prev => ({ ...prev, orders: true }));
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${API}/users`, {
-        headers: getAuthHeaders()
-      });
-      setUsers(response.data);
-      setDataFetched(prev => ({ ...prev, users: true }));
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to fetch users');
-    }
-  };
-
-  const fetchReviews = async () => {
-    try {
-      const response = await axios.get(`${API}/reviews`, {
-        headers: getAuthHeaders()
-      });
-      setReviews(response.data);
-      setDataFetched(prev => ({ ...prev, reviews: true }));
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-      toast.error('Failed to fetch reviews');
-    }
-  };
+  // ✅ Fetch functions now provided by AdminDataContext
 
   return (
     <div className="min-h-screen bg-gray-50">

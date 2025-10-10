@@ -42,7 +42,12 @@ import { AdvancedHeader } from "./components/AdvancedHeader";
 import { motion } from "framer-motion";
 import { useScrollAnimation, useStaggerAnimation } from "./hooks/useScrollAnimation";
 import "./App.css";
-import "./components/images/Premium_mithai.png";
+import { suppressResizeObserverError } from "./utils/errorHandler";
+import { LOGOS, PRODUCT_IMAGES, CERTIFICATES } from "./config/imageConfig";
+import { AdminDataProvider } from "./contexts/AdminDataContext";
+
+// Suppress ResizeObserver errors on app load
+suppressResizeObserverError();
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -965,14 +970,14 @@ const AboutSection = () => {
           >
             <div className="space-y-4">
               <motion.img 
-                src="/Traditional_mithaai.png"
+                src={PRODUCT_IMAGES.traditional}
                 alt="Traditional sweet making"
                 className="rounded-lg shadow-md"
                 whileHover={{ scale: 1.05, rotate: 2 }}
                 transition={{ type: "spring", stiffness: 300 }}
               />
               <motion.img 
-                src="/Premium_sweets.png"
+                src={PRODUCT_IMAGES.premium}
                 alt="Premium ingredients"
                 className="rounded-lg shadow-md"
                 whileHover={{ scale: 1.05, rotate: -2 }}
@@ -981,14 +986,14 @@ const AboutSection = () => {
             </div>
             <div className="space-y-4 mt-8">
               <motion.img 
-                src="hand_sweets.png"
+                src={PRODUCT_IMAGES.handSweets}
                 alt="Handcrafted sweets"
                 className="rounded-lg shadow-md"
                 whileHover={{ scale: 1.05, rotate: -2 }}
                 transition={{ type: "spring", stiffness:300 }}
               />
               <motion.img 
-                src="food_safty.png"
+                src={PRODUCT_IMAGES.foodSafety}
                 alt="Quality testing"
                 className="rounded-lg shadow-md"
                 whileHover={{ scale: 1.05, rotate: 2 }}
@@ -1156,7 +1161,7 @@ const Footer = () => {
           <div>
             <div className="mb-4">
               <img 
-                src="/mithaas-logo.png" 
+                src={LOGOS.main} 
                 alt="Mithaas Delights Logo" 
                 className="w-16 h-16 object-contain mb-2"
               />
@@ -1202,12 +1207,12 @@ const Footer = () => {
         <div className="border-t border-white/20 pt-6 mb-6">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <img 
-              src="/fssai-certificate.jpg" 
+              src={CERTIFICATES.fssai} 
               alt="FSSAI Certificate - License 21425850011554" 
               className="h-32 md:h-40 w-auto object-contain rounded-lg shadow-lg hover:scale-105 transition-transform cursor-pointer"
             />
             <img 
-              src="/msme-certificate.jpg" 
+              src={CERTIFICATES.msme} 
               alt="MSME Certificate - UDYAM-MP-23-0235652" 
               className="h-32 md:h-40 w-auto object-contain rounded-lg shadow-lg hover:scale-105 transition-transform cursor-pointer"
             />
@@ -1820,40 +1825,42 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <div className="App">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/product/:productId" element={<ProductDetailPage Header={Header} Footer={Footer} />} />
-              <Route path="/track-order" element={<OrderTracking />} />
-              <Route path="/track-order/:orderId" element={<OrderTrackingPage />} />
-              <Route path="/order-success" element={<OrderSuccessPage />} />
-              <Route path="/bulk-orders" element={<BulkOrderPage />} />
-              <Route path="/gallery" element={<MediaGalleryPage />} />
-              <Route path="/terms" element={<TermsAndConditions />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/orders" 
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="/admin" element={<ProtectedAdminPanel />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
-          <Toaster />
-        </div>
+        <AdminDataProvider>
+          <div className="App">
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/product/:productId" element={<ProductDetailPage Header={Header} Footer={Footer} />} />
+                <Route path="/track-order" element={<OrderTracking />} />
+                <Route path="/track-order/:orderId" element={<OrderTrackingPage />} />
+                <Route path="/order-success" element={<OrderSuccessPage />} />
+                <Route path="/bulk-orders" element={<BulkOrderPage />} />
+                <Route path="/gallery" element={<MediaGalleryPage />} />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/orders" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/admin" element={<ProtectedAdminPanel />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+          </div>
+        </AdminDataProvider>
       </CartProvider>
     </AuthProvider>
   );
