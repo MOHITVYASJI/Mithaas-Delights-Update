@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 import logging
+from utils import prepare_for_mongo, parse_from_mongo
 
 logger = logging.getLogger(__name__)
 
@@ -292,26 +293,11 @@ class AdvertisementManager:
         )
         return result.modified_count > 0
     
+    # Helper functions now use centralized utils from utils.py
     def _prepare_for_mongo(self, data: dict) -> dict:
-        """Prepare data for MongoDB storage"""
-        if isinstance(data.get('created_at'), datetime):
-            data['created_at'] = data['created_at'].isoformat()
-        if isinstance(data.get('updated_at'), datetime):
-            data['updated_at'] = data['updated_at'].isoformat()
-        if isinstance(data.get('start_date'), datetime):
-            data['start_date'] = data['start_date'].isoformat()
-        if isinstance(data.get('end_date'), datetime):
-            data['end_date'] = data['end_date'].isoformat()
-        return data
+        """Prepare data for MongoDB storage - delegates to utils.prepare_for_mongo"""
+        return prepare_for_mongo(data)
     
     def _parse_from_mongo(self, item: dict) -> dict:
-        """Parse MongoDB document back to Python objects"""
-        if isinstance(item.get('created_at'), str):
-            item['created_at'] = datetime.fromisoformat(item['created_at'])
-        if isinstance(item.get('updated_at'), str):
-            item['updated_at'] = datetime.fromisoformat(item['updated_at'])
-        if isinstance(item.get('start_date'), str):
-            item['start_date'] = datetime.fromisoformat(item['start_date'])
-        if isinstance(item.get('end_date'), str):
-            item['end_date'] = datetime.fromisoformat(item['end_date'])
-        return item
+        """Parse MongoDB document back to Python objects - delegates to utils.parse_from_mongo"""
+        return parse_from_mongo(item)

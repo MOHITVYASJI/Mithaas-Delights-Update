@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import uuid
 import logging
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from utils import prepare_for_mongo
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -52,22 +53,7 @@ class CartValidationResult(BaseModel):
     warnings: List[str] = []
 
 # ==================== HELPER FUNCTIONS ====================
-
-def prepare_for_mongo(data):
-    """Convert datetime objects to ISO strings for MongoDB storage"""
-    if isinstance(data.get('created_at'), datetime):
-        data['created_at'] = data['created_at'].isoformat()
-    if isinstance(data.get('updated_at'), datetime):
-        data['updated_at'] = data['updated_at'].isoformat()
-    return data
-
-def parse_from_mongo(item):
-    """Parse MongoDB document back to Python objects"""
-    if isinstance(item.get('created_at'), str):
-        item['created_at'] = datetime.fromisoformat(item['created_at'])
-    if isinstance(item.get('updated_at'), str):
-        item['updated_at'] = datetime.fromisoformat(item['updated_at'])
-    return item
+# All helper functions have been moved to utils.py for centralization
 
 # ==================== CART SYNC ENDPOINTS ====================
 

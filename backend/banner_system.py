@@ -10,7 +10,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 import logging
-import base64
+from utils import save_base64_image, prepare_for_mongo, parse_from_mongo, get_file_size
 import os
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -77,71 +77,7 @@ class BannerUpdate(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
 
-# ==================== HELPER FUNCTIONS ====================
-
-def prepare_for_mongo(data):
-    """Convert datetime objects to ISO strings for MongoDB storage"""
-    if isinstance(data.get('created_at'), datetime):
-        data['created_at'] = data['created_at'].isoformat()
-    if isinstance(data.get('updated_at'), datetime):
-        data['updated_at'] = data['updated_at'].isoformat()
-    if isinstance(data.get('start_date'), datetime):
-        data['start_date'] = data['start_date'].isoformat()
-    if isinstance(data.get('end_date'), datetime):
-        data['end_date'] = data['end_date'].isoformat()
-    return data
-
-def parse_from_mongo(item):
-    """Parse MongoDB document back to Python objects"""
-    if isinstance(item.get('created_at'), str):
-        item['created_at'] = datetime.fromisoformat(item['created_at'])
-    if isinstance(item.get('updated_at'), str):
-        item['updated_at'] = datetime.fromisoformat(item['updated_at'])
-    if isinstance(item.get('start_date'), str):
-        item['start_date'] = datetime.fromisoformat(item['start_date'])
-    if isinstance(item.get('end_date'), str):
-        item['end_date'] = datetime.fromisoformat(item['end_date'])
-    return item
-
-def save_base64_image(base64_data: str, folder: str = "banners") -> Optional[str]:
-    """Save base64 encoded image to file system"""
-    try:
-        # Create uploads directory if it doesn't exist
-        upload_dir = f"/app/uploads/{folder}"
-        os.makedirs(upload_dir, exist_ok=True)
-        
-        # Decode base64 data
-        if "," in base64_data:
-            header, data = base64_data.split(",", 1)
-            # Extract file extension from header
-            if "jpeg" in header or "jpg" in header:
-                ext = "jpg"
-            elif "png" in header:
-                ext = "png"
-            elif "gif" in header:
-                ext = "gif"
-            elif "webp" in header:
-                ext = "webp"
-            else:
-                ext = "jpg"  # default
-        else:
-            data = base64_data
-            ext = "jpg"  # default
-        
-        # Generate unique filename
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        filepath = os.path.join(upload_dir, filename)
-        
-        # Save file
-        with open(filepath, "wb") as f:
-            f.write(base64.b64decode(data))
-        
-        # Return URL path
-        return f"/uploads/{folder}/{filename}"
-        
-    except Exception as e:
-        logger.error(f"Failed to save base64 image: {str(e)}")
-        return None
+# Helper functions now imported from utils.py
 
 # ==================== BANNER ENDPOINTS ====================
 

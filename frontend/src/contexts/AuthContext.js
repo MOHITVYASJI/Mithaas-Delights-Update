@@ -44,6 +44,23 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      // Sync cart after successful login
+      try {
+        const guestCart = loadCartFromLocalStorage();
+        if (guestCart && guestCart.length > 0) {
+          // Call backend cart sync/merge API
+          await axios.post(`${API_URL}/cart/merge`, guestCart, {
+            headers: { 'Authorization': `Bearer ${access_token}` }
+          });
+          // Clear guest cart from localStorage after sync
+          clearCartFromLocalStorage();
+        }
+      } catch (cartError) {
+        console.error('Cart sync error:', cartError);
+        // Don't fail login if cart sync fails
+      }
+      
       return { success: true };
     } catch (error) {
       return {

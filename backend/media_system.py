@@ -10,9 +10,9 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 import logging
-import base64
 import os
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from utils import save_base64_image, prepare_for_mongo, parse_from_mongo, get_file_size
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -65,69 +65,7 @@ class MediaItemUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 # ==================== HELPER FUNCTIONS ====================
-
-def prepare_for_mongo(data):
-    """Convert datetime objects to ISO strings for MongoDB storage"""
-    if isinstance(data.get('created_at'), datetime):
-        data['created_at'] = data['created_at'].isoformat()
-    if isinstance(data.get('updated_at'), datetime):
-        data['updated_at'] = data['updated_at'].isoformat()
-    return data
-
-def parse_from_mongo(item):
-    """Parse MongoDB document back to Python objects"""
-    if isinstance(item.get('created_at'), str):
-        item['created_at'] = datetime.fromisoformat(item['created_at'])
-    if isinstance(item.get('updated_at'), str):
-        item['updated_at'] = datetime.fromisoformat(item['updated_at'])
-    return item
-
-def save_base64_image(base64_data: str, folder: str = "media") -> Optional[str]:
-    """Save base64 encoded image to file system"""
-    try:
-        # Create uploads directory if it doesn't exist
-        upload_dir = f"/app/uploads/{folder}"
-        os.makedirs(upload_dir, exist_ok=True)
-        
-        # Decode base64 data
-        if "," in base64_data:
-            header, data = base64_data.split(",", 1)
-            # Extract file extension from header
-            if "jpeg" in header or "jpg" in header:
-                ext = "jpg"
-            elif "png" in header:
-                ext = "png"
-            elif "gif" in header:
-                ext = "gif"
-            elif "webp" in header:
-                ext = "webp"
-            else:
-                ext = "jpg"  # default
-        else:
-            data = base64_data
-            ext = "jpg"  # default
-        
-        # Generate unique filename
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        filepath = os.path.join(upload_dir, filename)
-        
-        # Save file
-        with open(filepath, "wb") as f:
-            f.write(base64.b64decode(data))
-        
-        # Return URL path
-        return f"/uploads/{folder}/{filename}"
-        
-    except Exception as e:
-        logger.error(f"Failed to save base64 image: {str(e)}")
-        return None
-
-def get_file_size(filepath: str) -> Optional[int]:
-    """Get file size in bytes"""
-    try:
-        return os.path.getsize(filepath)
-    except:
-        return None
+# All helper functions have been moved to utils.py for centralization
 
 # ==================== MEDIA ENDPOINTS ====================
 
@@ -321,7 +259,7 @@ def setup_media_routes(db: AsyncIOMotorDatabase, get_current_admin_user):
         
         new_status = not media_item.get("is_active", True)
         
-        result = await db.media_gallery.update_one(
+        await db.media_gallery.update_one(
             {"id": media_id},
             {"$set": {
                 "is_active": new_status,

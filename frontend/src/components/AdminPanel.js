@@ -26,24 +26,35 @@ export const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedTab, setSelectedTab] = useState('dashboard');
+  
+  // Track which data has been fetched to avoid refetching
+  const [dataFetched, setDataFetched] = useState({
+    products: false,
+    orders: false,
+    users: false,
+    reviews: false
+  });
 
+  // Fetch initial data (products and orders) on component mount
   useEffect(() => {
     fetchProducts();
     fetchOrders();
   }, []);
 
+  // Fetch data on-demand when tab is selected (only if not already fetched)
   useEffect(() => {
-    if (selectedTab === 'users') {
+    if (selectedTab === 'users' && !dataFetched.users) {
       fetchUsers();
-    } else if (selectedTab === 'reviews') {
+    } else if (selectedTab === 'reviews' && !dataFetched.reviews) {
       fetchReviews();
     }
-  }, [selectedTab]);
+  }, [selectedTab, dataFetched]);
 
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${API}/products`);
       setProducts(response.data);
+      setDataFetched(prev => ({ ...prev, products: true }));
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to fetch products');
@@ -56,6 +67,7 @@ export const AdminPanel = () => {
         headers: getAuthHeaders()
       });
       setOrders(response.data);
+      setDataFetched(prev => ({ ...prev, orders: true }));
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
@@ -67,6 +79,7 @@ export const AdminPanel = () => {
         headers: getAuthHeaders()
       });
       setUsers(response.data);
+      setDataFetched(prev => ({ ...prev, users: true }));
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to fetch users');
@@ -79,6 +92,7 @@ export const AdminPanel = () => {
         headers: getAuthHeaders()
       });
       setReviews(response.data);
+      setDataFetched(prev => ({ ...prev, reviews: true }));
     } catch (error) {
       console.error('Error fetching reviews:', error);
       toast.error('Failed to fetch reviews');
