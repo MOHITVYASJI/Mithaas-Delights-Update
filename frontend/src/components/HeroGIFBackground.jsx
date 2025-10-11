@@ -12,6 +12,20 @@ export const HeroGIFBackground = ({
   blend = 'normal' // Options: 'normal', 'multiply', 'screen', 'overlay'
 }) => {
   const isVideo = gifPath.toLowerCase().endsWith('.mp4') || gifPath.toLowerCase().endsWith('.webm');
+  const videoRef = React.useRef(null);
+
+  // Ensure video plays on mobile
+  React.useEffect(() => {
+    if (videoRef.current && isVideo) {
+      videoRef.current.play().catch(err => {
+        console.log('Video autoplay failed, retrying...', err);
+        // Retry after user interaction
+        setTimeout(() => {
+          videoRef.current?.play().catch(() => {});
+        }, 1000);
+      });
+    }
+  }, [isVideo]);
 
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -24,15 +38,25 @@ export const HeroGIFBackground = ({
       >
         {isVideo ? (
           <video
+            ref={videoRef}
             src={gifPath}
             autoPlay
             loop
             muted
             playsInline
+            preload="auto"
+            webkit-playsinline="true"
+            x5-playsinline="true"
             className="w-full h-full object-cover"
             style={{
               mixBlendMode: blend,
               filter: 'brightness(0.9) contrast(1.1)',
+            }}
+            onLoadedData={() => {
+              // Force play when video is loaded
+              if (videoRef.current) {
+                videoRef.current.play().catch(() => {});
+              }
             }}
           />
         ) : (
@@ -40,6 +64,7 @@ export const HeroGIFBackground = ({
             src={gifPath}
             alt="Background Animation"
             className="w-full h-full object-cover"
+            loading="eager"
             style={{
               mixBlendMode: blend,
               filter: 'brightness(0.9) contrast(1.1)',

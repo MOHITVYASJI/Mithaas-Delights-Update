@@ -914,13 +914,13 @@ const AboutSection = () => {
           className="grid lg:grid-cols-2 gap-12 items-center"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8 }}
         >
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <Badge className="bg-orange-100 text-orange-700 mb-4">About Us</Badge>
@@ -965,7 +965,7 @@ const AboutSection = () => {
             className="grid grid-cols-2 gap-4"
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <div className="space-y-4">
