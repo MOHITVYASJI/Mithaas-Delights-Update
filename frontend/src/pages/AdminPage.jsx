@@ -3,12 +3,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Package, ShoppingCart, Users, Star } from 'lucide-react';
+import { SharedHeader } from '@/components/SharedHeader';
 
 export const AdminPage = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4" data-testid="admin-page">
+    <div className="min-h-screen bg-gray-50" data-testid="admin-page">
+      <SharedHeader />
+      <div className="pt-24 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold" data-testid="admin-title">Admin Dashboard</h1>
@@ -105,6 +108,7 @@ export const AdminPage = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

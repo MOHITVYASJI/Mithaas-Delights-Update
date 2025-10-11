@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthModals } from '../components/auth/AuthModel';
+import { SharedHeader } from '../components/SharedHeader';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -78,7 +79,9 @@ export const BulkOrderPage = () => {
   // If not authenticated, show login prompt
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+        <SharedHeader />
+        <div className="pt-24 pb-12 px-4">
         <div className="max-w-2xl mx-auto">
           <Card className="text-center">
             <CardContent className="pt-12 pb-12">
@@ -102,12 +105,15 @@ export const BulkOrderPage = () => {
           onClose={() => setAuthModalOpen(false)}
           initialMode="login"
         />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+      <SharedHeader />
+      <div className="pt-24 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <Package className="w-16 h-16 mx-auto text-orange-500 mb-4" />
@@ -309,6 +315,7 @@ export const BulkOrderPage = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

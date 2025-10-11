@@ -16,7 +16,9 @@ import { SecurePaymentBadges } from '../components/SecurePaymentBadges';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export const ProductDetailPage = ({ Header, Footer }) => {
+import { SharedHeader } from '../components/SharedHeader';
+
+export const ProductDetailPage = ({ Footer }) => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
@@ -150,8 +152,8 @@ export const ProductDetailPage = ({ Header, Footer }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <SharedHeader />
+        <div className="flex items-center justify-center min-h-[60vh] pt-24">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
         </div>
         <Footer />
@@ -162,8 +164,8 @@ export const ProductDetailPage = ({ Header, Footer }) => {
   if (!product) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <SharedHeader />
+        <div className="flex items-center justify-center min-h-[60vh] pt-24">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Product Not Found</h2>
             <Button onClick={() => navigate('/')}>Go Back Home</Button>
@@ -176,9 +178,9 @@ export const ProductDetailPage = ({ Header, Footer }) => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <SharedHeader />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-24 pb-8">
         {/* Back Button */}
         <Button
           variant="ghost"

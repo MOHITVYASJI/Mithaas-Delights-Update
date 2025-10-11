@@ -4,6 +4,7 @@ import { Image, Video, Eye } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Dialog, DialogContent } from '../components/ui/dialog';
+import { SharedHeader } from '../components/SharedHeader';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -34,7 +35,9 @@ export const MediaGalleryPage = () => {
     : mediaItems.filter(item => item.media_type === filter);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+      <SharedHeader />
+      <div className="pt-24 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -167,6 +170,7 @@ export const MediaGalleryPage = () => {
             )}
           </DialogContent>
         </Dialog>
+      </div>
       </div>
     </div>
   );
