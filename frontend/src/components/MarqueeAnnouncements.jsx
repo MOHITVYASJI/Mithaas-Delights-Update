@@ -150,7 +150,7 @@ export const MarqueeAnnouncements = () => {
                 }}
               >
                 <Volume2 className="w-3 h-3 md:w-4 md:h-4 animate-pulse" />
-                <span className="font-semibold text-xs md:text-sm">ANNOUNCEMENTS</span>
+                <span className="font-semibold text-xs md:text-sm"></span>
               </div>
               <div className="flex-1 overflow-hidden">
                 <div 
