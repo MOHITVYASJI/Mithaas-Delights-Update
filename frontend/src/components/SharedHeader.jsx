@@ -28,6 +28,8 @@ export const SharedHeader = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { cartCount } = useCart();
   const { user, logout, isAuthenticated, loading } = useAuth();
 
@@ -52,6 +54,27 @@ export const SharedHeader = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  // Auto-hide header on scroll down, show on scroll up
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show header when scrolling up or at the top
+      if (currentScrollY < lastScrollY || currentScrollY < 10) {
+        setIsVisible(true);
+      } 
+      // Hide header when scrolling down and past 100px
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+        setIsMenuOpen(false); // Close mobile menu when hiding
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
@@ -83,7 +106,14 @@ export const SharedHeader = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50" style={{marginLeft: '20px', marginRight: '20px'}}>
+    <header 
+      className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out" 
+      style={{
+        marginLeft: '20px', 
+        marginRight: '20px',
+        transform: isVisible ? 'translateY(0)' : 'translateY(-100%)'
+      }}
+    >
       <div className="mx-auto px-5 py-2 rounded-b-2xl border border-white/20 shadow-lg" style={{
         background: 'rgba(255, 255, 255, 0)',
         backdropFilter: 'blur(40px)',
@@ -272,12 +302,12 @@ export const SharedHeader = () => {
         {isMenuOpen && (
           <nav className="mt-4 pb-4 border-t border-white/20 pt-4 bg-black/20 rounded-lg" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)'}}>
             <div className="flex flex-col space-y-3 px-4">
-              <a href="/" className="text-black hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Home</a>
-              <a href="/#products" className="text-black/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Products</a>
-              <a href="/bulk-orders" className="text-black hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Bulk Orders</a>
-              <a href="/gallery" className="text-black hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Gallery</a>
-              <a href="/#about" className="text-black hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>About</a>
-              <a href="/#contact" className="text-black hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Contact</a>
+              <a href="/" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Home</a>
+              <a href="/#products" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Products</a>
+              <a href="/bulk-orders" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Bulk Orders</a>
+              <a href="/gallery" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Gallery</a>
+              <a href="/#about" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>About</a>
+              <a href="/#contact" className="text-white/90 hover:text-orange-300 transition-colors px-4 py-2 rounded-full" style={{backdropFilter: 'blur(60%)', WebkitBackdropFilter: 'blur(60%)', background: 'rgba(255, 255, 255, 0.1)'}}>Contact</a>
               {!isAuthenticated && (
                 <div className="flex flex-col space-y-2 pt-2 border-t border-white/20">
                   <Button 
