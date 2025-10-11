@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
 } from './ui/dropdown-menu';
 import { toast } from 'sonner';
+import './ThemeSwitcher.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -257,9 +258,19 @@ export const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" data-testid="theme-switcher-button">
-          <Palette className="w-5 h-5" />
-        </Button>
+        <div className="theme-toggle-wrapper">
+          <input 
+            id="theme-toggle" 
+            type="checkbox" 
+            checked={userMode === 'dark'}
+            onChange={toggleUserMode}
+            data-testid="theme-toggle-input"
+          />
+          <label className="theme-toggle-item" htmlFor="theme-toggle">
+            <Sun className="theme-toggle-icon theme-toggle-icon--light" />
+            <Moon className="theme-toggle-icon theme-toggle-icon--dark" />
+          </label>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
         {/* User Mode Toggle (Light/Dark) */}

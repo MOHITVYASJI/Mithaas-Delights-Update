@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import './HeroVideo.css';
 
 /**
  * GIF/Video-based Hero Background
@@ -47,13 +48,23 @@ export const HeroGIFBackground = ({
             preload="auto"
             webkit-playsinline="true"
             x5-playsinline="true"
-            className="w-full h-full object-cover"
+            x-webkit-airplay="allow"
+            crossOrigin="anonymous"
+            className="w-full h-full object-cover mobile-video-fix"
             style={{
               mixBlendMode: blend,
               filter: 'brightness(0.9) contrast(1.1)',
+              WebkitTransform: 'translateZ(0)',
+              transform: 'translateZ(0)',
             }}
             onLoadedData={() => {
               // Force play when video is loaded
+              if (videoRef.current) {
+                videoRef.current.play().catch(() => {});
+              }
+            }}
+            onCanPlay={() => {
+              // Additional play trigger for mobile
               if (videoRef.current) {
                 videoRef.current.play().catch(() => {});
               }

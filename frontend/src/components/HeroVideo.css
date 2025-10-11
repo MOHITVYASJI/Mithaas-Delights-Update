@@ -1,0 +1,26 @@
+/* Mobile Video Fix CSS */
+.mobile-video-fix {
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+@media (max-width: 768px) {
+  .mobile-video-fix {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    position: relative !important;
+  }
+}
+
+/* Ensure video is visible on iOS devices */
+@supports (-webkit-overflow-scrolling: touch) {
+  .mobile-video-fix {
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+  }
+}

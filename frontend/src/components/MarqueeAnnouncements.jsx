@@ -3,6 +3,7 @@ import axios from 'axios';
 import { X, Volume2, Megaphone } from 'lucide-react';
 import { Button } from './ui/button';
 import { motion } from 'framer-motion';
+import './MarqueeAnnouncements.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -134,7 +135,7 @@ export const MarqueeAnnouncements = () => {
         
         return (
           <div 
-            className="py-2 relative overflow-hidden shadow-lg transition-all duration-300" 
+            className="py-2 relative overflow-hidden shadow-lg transition-all duration-300 marquee-announcement-wrapper" 
             style={{ backgroundColor: bgColor }}
             data-testid="marquee-section"
             onMouseEnter={() => setIsPaused(true)}
@@ -142,28 +143,28 @@ export const MarqueeAnnouncements = () => {
           >
             <div className="flex items-center">
               <div 
-                className="flex items-center space-x-2 px-4 flex-shrink-0 py-1"
+                className="flex items-center space-x-1 md:space-x-2 px-2 md:px-4 flex-shrink-0 py-1"
                 style={{ 
                   backgroundColor: 'rgba(0, 0, 0, 0.1)',
                   color: textColor 
                 }}
               >
-                <Volume2 className="w-4 h-4 animate-pulse" />
-                <span className="font-semibold text-sm">ANNOUNCEMENTS</span>
+                <Volume2 className="w-3 h-3 md:w-4 md:h-4 animate-pulse" />
+                <span className="font-semibold text-xs md:text-sm">ANNOUNCEMENTS</span>
               </div>
               <div className="flex-1 overflow-hidden">
                 <div 
                   className={`marquee-content flex whitespace-nowrap ${isPaused ? 'paused' : ''}`}
                   style={{
                     color: textColor,
-                    fontSize: fontSize,
+                    fontSize: typeof fontSize === 'string' && fontSize.includes('px') ? `clamp(12px, ${fontSize}, 18px)` : fontSize,
                     fontWeight: fontWeight
                   }}
                 >
                   {visibleMarqueeAnnouncements.map((announcement, index) => (
                     <span
                       key={announcement.id}
-                      className="px-8 py-1 cursor-pointer hover:opacity-80 transition-opacity rounded inline-block"
+                      className="px-4 md:px-8 py-1 cursor-pointer hover:opacity-80 transition-opacity rounded inline-block"
                       onClick={() => {
                         recordClick(announcement.id);
                         if (announcement.action_url) {

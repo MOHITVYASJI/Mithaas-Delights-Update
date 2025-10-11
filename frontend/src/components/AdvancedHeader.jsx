@@ -161,10 +161,20 @@ export const AdvancedHeader = () => {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               >
-                <AnimatedLogoGIF className="mr-2" gifPath="/animated-logo.mp4" />
-                <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
-                  Mithaas Delights
-                </span>
+                {isMobile ? (
+                  <img 
+                    src="/mithaas-logo.png" 
+                    alt="Mithaas Delights" 
+                    className="h-10 w-auto object-contain"
+                  />
+                ) : (
+                  <>
+                    <AnimatedLogoGIF className="mr-2" gifPath="/animated-logo.mp4" />
+                    <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
+                      Mithaas Delights
+                    </span>
+                  </>
+                )}
               </motion.a>
 
               {/* Desktop Navigation */}

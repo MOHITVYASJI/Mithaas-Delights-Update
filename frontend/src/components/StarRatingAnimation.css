@@ -1,0 +1,243 @@
+/* Star Rating Animation Styles */
+.star-rating {
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.star-rating__stars {
+  display: flex;
+  padding-bottom: 0.375em;
+  position: relative;
+  gap: 0.25rem;
+}
+
+.star-rating__star {
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  width: 2em;
+  height: 2em;
+  transition: transform 0.2s ease;
+}
+
+.star-rating--sm .star-rating__star {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.star-rating--md .star-rating__star {
+  width: 2em;
+  height: 2em;
+}
+
+.star-rating--lg .star-rating__star {
+  width: 2.5em;
+  height: 2.5em;
+}
+
+.star-rating__star-ring,
+.star-rating__star-fill,
+.star-rating__star-line,
+.star-rating__star-stroke {
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+.star-rating__star-ring,
+.star-rating__star-fill,
+.star-rating__star-line {
+  stroke: var(--yellow, #f4a825);
+}
+
+.star-rating__star-fill {
+  fill: var(--yellow, #f4a825);
+  transform: scale(0);
+  transition: fill 0.3s cubic-bezier(0.42, 0, 0.58, 1), 
+              transform 0.3s cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+.star-rating__star-line {
+  stroke-dasharray: 12 13;
+  stroke-dashoffset: -13;
+}
+
+.star-rating__star-stroke {
+  stroke: #c7cad1;
+  transition: stroke 0.3s;
+}
+
+.dark .star-rating__star-stroke {
+  stroke: #454954;
+}
+
+.star-rating__label {
+  cursor: pointer;
+  padding: 0.125em;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.star-rating--readonly .star-rating__label {
+  cursor: default;
+}
+
+.star-rating__label:hover:not(.star-rating--readonly *) {
+  transform: scale(1.1);
+}
+
+.star-rating__label--delay1 .star-rating__star-ring,
+.star-rating__label--delay1 .star-rating__star-fill,
+.star-rating__label--delay1 .star-rating__star-line,
+.star-rating__label--delay1 .star-rating__star-stroke {
+  animation-delay: 0.05s;
+}
+
+.star-rating__label--delay2 .star-rating__star-ring,
+.star-rating__label--delay2 .star-rating__star-fill,
+.star-rating__label--delay2 .star-rating__star-line,
+.star-rating__label--delay2 .star-rating__star-stroke {
+  animation-delay: 0.1s;
+}
+
+.star-rating__label--delay3 .star-rating__star-ring,
+.star-rating__label--delay3 .star-rating__star-fill,
+.star-rating__label--delay3 .star-rating__star-line,
+.star-rating__label--delay3 .star-rating__star-stroke {
+  animation-delay: 0.15s;
+}
+
+.star-rating__label--delay4 .star-rating__star-ring,
+.star-rating__label--delay4 .star-rating__star-fill,
+.star-rating__label--delay4 .star-rating__star-line,
+.star-rating__label--delay4 .star-rating__star-stroke {
+  animation-delay: 0.2s;
+}
+
+.star-rating__input {
+  position: absolute;
+  appearance: none;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.star-rating__label--active .star-rating__star-ring {
+  animation-name: starRing;
+}
+
+.star-rating__label--active .star-rating__star-stroke {
+  animation-name: starStroke;
+}
+
+.star-rating__label--active .star-rating__star-line {
+  animation-name: starLine;
+}
+
+.star-rating__label--active .star-rating__star-fill {
+  animation-name: starFill;
+}
+
+.star-rating__label:hover .star-rating__star-stroke {
+  stroke: var(--yellow, #f4a825);
+  transform: scale(1);
+}
+
+.star-rating__sr {
+  clip: rect(1px, 1px, 1px, 1px);
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+.star-rating__display {
+  font-size: 1em;
+  font-weight: 500;
+  min-height: 1.5em;
+  text-align: center;
+  margin-top: 0.5rem;
+  color: var(--fg, #17181c);
+}
+
+.dark .star-rating__display {
+  color: var(--fg, #e3e4e8);
+}
+
+/* Animations */
+@keyframes starRing {
+  from, 20% {
+    animation-timing-function: ease-in;
+    opacity: 1;
+    r: 8px;
+    stroke-width: 16px;
+    transform: scale(0);
+  }
+  35% {
+    animation-timing-function: ease-out;
+    opacity: 0.5;
+    r: 8px;
+    stroke-width: 16px;
+    transform: scale(1);
+  }
+  50%, to {
+    opacity: 0;
+    r: 16px;
+    stroke-width: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes starFill {
+  from, 40% {
+    animation-timing-function: ease-out;
+    transform: scale(0);
+  }
+  60% {
+    animation-timing-function: ease-in-out;
+    transform: scale(1.2);
+  }
+  80% {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes starStroke {
+  from {
+    transform: scale(1);
+  }
+  20%, to {
+    transform: scale(0);
+  }
+}
+
+@keyframes starLine {
+  from, 40% {
+    animation-timing-function: ease-out;
+    stroke-dasharray: 1 23;
+    stroke-dashoffset: 1;
+  }
+  60%, to {
+    stroke-dasharray: 12 13;
+    stroke-dashoffset: -13;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .star-rating__stars {
+    gap: 0.125rem;
+  }
+  
+  .star-rating--md .star-rating__star {
+    width: 1.75em;
+    height: 1.75em;
+  }
+  
+  .star-rating__display {
+    font-size: 0.875em;
+  }
+}

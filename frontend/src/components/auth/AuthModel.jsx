@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
+import { User, Lock, Mail, Phone } from 'lucide-react';
+import './AnimatedAuth.css';
 
 export const AuthModals = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [mode, setMode] = useState(initialMode);
@@ -22,8 +24,25 @@ export const AuthModals = ({ isOpen, onClose, initialMode = 'login' }) => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const { login, register } = useAuth();
 
+  useEffect(() => {
+    const checkTheme = () => {
+      const theme = document.documentElement.classList.contains('dark');
+      setIsDark(theme);
+    };
+    
+    checkTheme();
+    
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -65,110 +84,150 @@ export const AuthModals = ({ isOpen, onClose, initialMode = 'login' }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" data-testid="auth-modal">
-        <DialogHeader>
-          <DialogTitle data-testid="auth-modal-title">
-            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'login'
-              ? 'Login to access your account'
-              : 'Sign up to get started'}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden" data-testid="auth-modal">
+        <div className={`animated-auth-container ${mode === 'register' ? 'active' : ''} ${isDark ? 'dark-mode' : 'light-mode'}`}>
+          <div className="animated-auth-curved-shape shape1"></div>
+          <div className="animated-auth-curved-shape shape2"></div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive" data-testid="auth-error">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          {/* Login Form */}
+          <div className="animated-auth-form-box login">
+            <h2 className="animation" style={{ '--S': 21, '--D': 0 }}>Login</h2>
+            {error && mode === 'login' && (
+              <Alert variant="destructive" data-testid="auth-error" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={handleSubmit}>
+              <div className="animated-auth-input-box animation" style={{ '--S': 22, '--D': 1 }}>
+                <input
+                  type="text"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  data-testid="auth-email-input"
+                />
+                <label>Email or Phone</label>
+                <Mail className="w-5 h-5" />
+              </div>
 
-          {mode === 'register' && (
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                data-testid="auth-name-input"
-              />
-            </div>
-          )}
-          {mode === 'register' && (
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="Enter your phone number"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                data-testid="auth-phone-input"
-              />
-            </div>
-          )}
+              <div className="animated-auth-input-box animation" style={{ '--S': 23, '--D': 2 }}>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  data-testid="auth-password-input"
+                />
+                <label>Password</label>
+                <Lock className="w-5 h-5" />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">{mode === 'login' ? 'Email or Phone' : 'Email'}</Label>
-            <Input
-              id="email"
-              name="email"
-              type="text"
-              placeholder={mode === 'login' ? "Enter your email or phone" : "Enter your email"}
-              value={formData.email}
-              onChange={handleChange}
-              required
-              data-testid="auth-email-input"
-            />
+              <div className="animated-auth-input-box animation" style={{ '--S': 24, '--D': 3 }}>
+                <button 
+                  className="animated-auth-btn" 
+                  type="submit"
+                  disabled={loading}
+                  data-testid="auth-submit-button"
+                >
+                  {loading ? 'Please wait...' : 'Login'}
+                </button>
+              </div>
+
+              <div className="animated-auth-link animation" style={{ '--S': 25, '--D': 4 }}>
+                <p>Don't have an account? <br /> <a href="#" onClick={(e) => { e.preventDefault(); toggleMode(); }} data-testid="auth-toggle-mode">Sign Up</a></p>
+              </div>
+            </form>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              data-testid="auth-password-input"
-            />
+          {/* Login Info Content */}
+          <div className="animated-auth-info-content login">
+            <h2 className="animation" style={{ '--S': 20, '--D': 0 }}>WELCOME BACK!</h2>
+            <p className="animation" style={{ '--S': 21, '--D': 1 }}>We are happy to have you with us again. If you need anything, we are here to help.</p>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-            data-testid="auth-submit-button"
-          >
-            {loading
-              ? 'Please wait...'
-              : mode === 'login'
-              ? 'Login'
-              : 'Sign Up'}
-          </Button>
+          {/* Register Form */}
+          <div className="animated-auth-form-box register">
+            <h2 className="animation" style={{ '--li': 17, '--S': 0 }}>Register</h2>
+            {error && mode === 'register' && (
+              <Alert variant="destructive" data-testid="auth-error" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={handleSubmit}>
+              <div className="animated-auth-input-box animation" style={{ '--li': 18, '--S': 1 }}>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  data-testid="auth-name-input"
+                />
+                <label>Username</label>
+                <User className="w-5 h-5" />
+              </div>
 
-          <div className="text-center text-sm">
-            <button
-              type="button"
-              onClick={toggleMode}
-              className="text-primary hover:underline"
-              data-testid="auth-toggle-mode"
-            >
-              {mode === 'login'
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Login'}
-            </button>
+              <div className="animated-auth-input-box animation" style={{ '--li': 19, '--S': 2 }}>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                <label>Email</label>
+                <Mail className="w-5 h-5" />
+              </div>
+
+              <div className="animated-auth-input-box animation" style={{ '--li': 19, '--S': 3 }}>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  data-testid="auth-phone-input"
+                />
+                <label>Phone</label>
+                <Phone className="w-5 h-5" />
+              </div>
+
+              <div className="animated-auth-input-box animation" style={{ '--li': 20, '--S': 4 }}>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <label>Password</label>
+                <Lock className="w-5 h-5" />
+              </div>
+
+              <div className="animated-auth-input-box animation" style={{ '--li': 21, '--S': 5 }}>
+                <button 
+                  className="animated-auth-btn" 
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Please wait...' : 'Register'}
+                </button>
+              </div>
+
+              <div className="animated-auth-link animation" style={{ '--li': 22, '--S': 6 }}>
+                <p>Already have an account? <br /> <a href="#" onClick={(e) => { e.preventDefault(); toggleMode(); }}>Sign In</a></p>
+              </div>
+            </form>
           </div>
-        </form>
+
+          {/* Register Info Content */}
+          <div className="animated-auth-info-content register">
+            <h2 className="animation" style={{ '--li': 17, '--S': 0 }}>WELCOME!</h2>
+            <p className="animation" style={{ '--li': 18, '--S': 1 }}>We're delighted to have you here. If you need any assistance, feel free to reach out.</p>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
