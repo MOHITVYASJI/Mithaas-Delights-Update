@@ -429,13 +429,13 @@ export const UnifiedChatBot = () => {
   // Floating Chat Button
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 chatbot-container">
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
           data-testid="chatbot-open-button"
         >
-          <MessageCircle className="w-6 h-6 text-white" />
+          <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </Button>
         <Badge className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-1 animate-bounce">
           AI Help
@@ -446,10 +446,10 @@ export const UnifiedChatBot = () => {
 
   // Chat Window
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 chatbot-container max-w-[calc(100vw-2rem)] md:max-w-none">
       <Card className={`transition-all duration-300 shadow-2xl ${
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
-      } ${isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'} flex flex-col overflow-hidden`} data-testid="chatbot-window">
+      } ${isMinimized ? 'w-full md:w-80 h-16' : 'w-[calc(100vw-2rem)] md:w-96 h-[500px] md:h-[600px]'} flex flex-col overflow-hidden`} data-testid="chatbot-window">
         
         {/* Header */}
         <CardHeader className={`pb-3 ${

@@ -54,15 +54,15 @@ export const CartDialog = ({ children }) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Your Cart ({cartCount} items)</span>
+          <DialogTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span className="text-base sm:text-lg">Your Cart ({cartCount} items)</span>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearCart}
-              className="text-red-600 hover:text-red-700"
+              className="text-red-600 hover:text-red-700 self-end sm:self-auto"
               data-testid="clear-cart-button"
             >
               Clear All
@@ -105,7 +105,7 @@ export const CartDialog = ({ children }) => {
                   Checkout
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full p-4 sm:p-6">
                 <CheckoutForm 
                   cartItems={cartItems} 
                   totalAmount={getTotalPrice()} 
@@ -130,30 +130,31 @@ const CartItem = ({ item, updateQuantity, removeFromCart }) => {
   const itemKey = `${item.id}-${item.weight}`;
   
   return (
-    <div className="flex items-center space-x-4 p-4 border rounded-lg hover:shadow-md transition-shadow" data-testid="cart-item">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:shadow-md transition-shadow" data-testid="cart-item">
       <img 
         src={item.image_url} 
         alt={item.name}
-        className="w-20 h-20 object-cover rounded-lg"
+        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
       />
       
       <div className="flex-1">
-        <h3 className="font-semibold text-gray-900" data-testid="cart-item-name">{item.name}</h3>
-        <div className="flex items-center space-x-2 mt-1">
+        <h3 className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-1" data-testid="cart-item-name">{item.name}</h3>
+        <div className="flex items-center flex-wrap gap-2 mt-1">
           <Badge variant="outline" className="text-xs">{item.weight}</Badge>
           {item.variant?.sku && (
             <span className="text-xs text-gray-500">SKU: {item.variant.sku}</span>
           )}
         </div>
         <div className="flex items-center space-x-2 mt-2">
-          <span className="text-lg font-bold text-orange-600" data-testid="cart-item-price">₹{item.price}</span>
+          <span className="text-base sm:text-lg font-bold text-orange-600" data-testid="cart-item-price">₹{item.price}</span>
           {item.original_price && item.original_price > item.price && (
-            <span className="text-sm text-gray-400 line-through">₹{item.original_price}</span>
+            <span className="text-xs sm:text-sm text-gray-400 line-through">₹{item.original_price}</span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-row sm:flex-col items-center justify-between w-full sm:w-auto gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
         <Button 
           size="sm" 
           variant="outline"
@@ -161,34 +162,35 @@ const CartItem = ({ item, updateQuantity, removeFromCart }) => {
           disabled={item.quantity <= 1}
           data-testid="decrease-quantity-button"
         >
-          <Minus className="w-4 h-4" />
+          <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
-        <span className="w-8 text-center font-semibold" data-testid="cart-item-quantity">{item.quantity}</span>
+          <span className="w-8 sm:w-10 text-center font-semibold text-sm sm:text-base" data-testid="cart-item-quantity">{item.quantity}</span>
         <Button 
           size="sm" 
           variant="outline"
           onClick={() => updateQuantity(itemKey, item.quantity + 1)}
           data-testid="increase-quantity-button"
         >
-          <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
         <Button 
           size="sm" 
           variant="ghost"
           onClick={() => removeFromCart(itemKey)}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 ml-1 sm:ml-2"
           data-testid="remove-item-button"
         >
-          <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </div>
 
-      <div className="text-right min-w-[80px]">
-        <div className="font-semibold text-gray-900" data-testid="cart-item-total">
-          ₹{(item.price * item.quantity).toFixed(2)}
-        </div>
-        <div className="text-xs text-gray-500">
-          ₹{item.price} × {item.quantity}
+        <div className="text-right">
+          <div className="font-semibold text-sm sm:text-base text-gray-900" data-testid="cart-item-total">
+            ₹{(item.price * item.quantity).toFixed(2)}
+          </div>
+          <div className="text-xs text-gray-500">
+            ₹{item.price} × {item.quantity}
+          </div>
         </div>
       </div>
     </div>
@@ -445,21 +447,21 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
       </DialogHeader>
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-6 sm:mb-8">
         {[1, 2, 3].map((step) => (
           <div key={step} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold
               ${step <= currentStep ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
               {step}
             </div>
             {step < 3 && (
-              <div className={`w-16 h-1 mx-2 ${step < currentStep ? 'bg-orange-500' : 'bg-gray-200'}`} />
+              <div className={`w-8 sm:w-16 h-1 mx-1 sm:mx-2 ${step < currentStep ? 'bg-orange-500' : 'bg-gray-200'}`} />
             )}
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Checkout Form */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -473,7 +475,7 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Full Name *</label>
                       <Input
@@ -537,7 +539,7 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
                       data-testid="delivery-address-input"
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">City *</label>
                       <Input

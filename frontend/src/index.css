@@ -2,6 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import './theme.css';
+@import './responsive.css';
 
 * {
   margin: 0;
@@ -60,4 +61,33 @@ html {
   align-items: center;
   justify-content: center;
   z-index: 9999;
+}
+/* Chatbot Mobile Responsiveness */
+.chatbot-container {
+  /* Ensure chatbot doesn't interfere with mobile navigation */
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .chatbot-container {
+    /* Adjust positioning for mobile keyboards */
+    bottom: env(safe-area-inset-bottom, 1rem) !important;
+  }
+  
+  /* Prevent chatbot from being too wide on small screens */
+  .chatbot-container [data-testid="chatbot-window"] {
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 4rem);
+  }
+  
+  /* Ensure input area is accessible above mobile keyboards */
+  .chatbot-container .border-t {
+    padding-bottom: env(safe-area-inset-bottom, 0.75rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .chatbot-container [data-testid="chatbot-window"] {
+    max-height: calc(100vh - 2rem);
+  }
 }
