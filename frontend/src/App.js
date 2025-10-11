@@ -1068,7 +1068,7 @@ const ContactSection = () => {
               <div>
                 <h3 className="font-semibold text-gray-800 mb-1">Call Us</h3>
                 <p className="text-gray-600">+91 8989549544</p>
-                <p className="text-gray-600">+91 9754681201</p>
+                <p className="text-gray-600">+91 9584051555</p>
               </div>
             </div>
 
