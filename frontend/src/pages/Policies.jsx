@@ -59,6 +59,7 @@ export const TermsAndConditions = () => {
               <section>
                 <h2 className="text-xl font-semibold text-gray-800 mb-3">5. Delivery</h2>
                 <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>Orders will be delivered within 5 business days </li>
                   <li>Delivery times are estimates and not guaranteed</li>
                   <li>Free delivery on orders above minimum amount</li>
                   <li>We are not liable for delays due to circumstances beyond our control</li>
@@ -114,6 +115,7 @@ export const TermsAndConditions = () => {
                   <li className="flex items-center"><Mail className="w-4 h-4 mr-2 text-orange-600" /> mithaasdelightsofficial@gmail.com</li>
                   <li>📞 +91 8989549544</li>
                   <li>📍 64, Kaveri Nagar, Indore, Madhya Pradesh 452006, India</li>
+                  <li>📍 This Website is operated by MOHIT VYAS</li>
                 </ul>
               </section>
             </CardContent>
