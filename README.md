@@ -242,7 +242,7 @@ curl https://your-backend-url.onrender.com/api/health
 ```bash
 curl -X POST https://your-backend-url.onrender.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@mithaas.com","password":"admin123"}'
+  -d '{"email":"**********","password":"**********"}'
 ```
 
 ---
@@ -320,3 +320,4 @@ This project is private. All rights reserved.
 **Made with ❤️ for Indian Sweet Shops**
 
 🍬 Happy Selling! 🎉
+
