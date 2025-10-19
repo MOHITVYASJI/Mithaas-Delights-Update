@@ -24,7 +24,7 @@ from auth_utils import (
     get_current_admin_user
 )
 from delivery_utils import calculate_delivery_charge, geocode_address
-from razorpay_utils import create_razorpay_order, verify_razorpay_signature, create_refund
+from phonepe_utils import get_phonepe_client
 from file_upload_utils import save_base64_image, save_uploaded_file, get_file_size
 # Import notification, theme, offers, advertisement, and announcement system classes
 from notification_system import NotificationManager, NotificationStatus, NotificationCreate
@@ -325,15 +325,20 @@ class CartItem(BaseModel):
     quantity: int
     price: float
 
-# Razorpay Models
-class RazorpayOrderCreate(BaseModel):
+# PhonePe Models
+class PhonePeOrderCreate(BaseModel):
     amount: float
+    merchant_order_id: str
+    customer_phone: Optional[str] = None
+    customer_email: Optional[str] = None
 
-class RazorpayPaymentVerify(BaseModel):
-    razorpay_order_id: str
-    razorpay_payment_id: str
-    razorpay_signature: str
-    order_id: str
+class PhonePePaymentVerify(BaseModel):
+    merchant_order_id: str
+    order_id: str  # Our internal order ID
+
+class PhonePeWebhookPayload(BaseModel):
+    event: str
+    payload: dict
 
 # User Models
 class UserRole(str, Enum):
@@ -486,9 +491,9 @@ class Order(BaseModel):
     customer_lon: Optional[float] = None
     phone_number: str
     email: str
-    razorpay_order_id: Optional[str] = None
-    razorpay_payment_id: Optional[str] = None
-    razorpay_signature: Optional[str] = None
+    phonepe_merchant_order_id: Optional[str] = None
+    phonepe_transaction_id: Optional[str] = None
+    phonepe_payment_status: Optional[str] = None
     whatsapp_link: Optional[str] = None
     advance_required: bool = False
     advance_amount: Optional[float] = None
@@ -1928,82 +1933,223 @@ async def track_order(order_id: str):
         "updated_at": order_obj.updated_at,
         "estimated_delivery": None  # Can be calculated based on status
     }
-# ==================== RAZORPAY ROUTES ====================
+# ==================== PHONEPE ROUTES ====================
 
-@api_router.post("/razorpay/create-order")
-async def create_razorpay_order_api(order_data: RazorpayOrderCreate):
-    """Create Razorpay order for payment"""
+@api_router.post("/phonepe/create-order")
+async def create_phonepe_order_api(order_data: PhonePeOrderCreate):
+    """Create PhonePe payment order"""
     try:
-        # Create Razorpay order using utility function
-        razorpay_order = create_razorpay_order(
+        # Get PhonePe client
+        phonepe_client = get_phonepe_client()
+        
+        # Generate redirect URL (customer will be redirected here after payment)
+        backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001')
+        redirect_url = f"{backend_url.replace('/api', '')}/payment-status"
+        
+        # Create PhonePe order
+        phonepe_response = phonepe_client.create_payment_order(
+            merchant_order_id=order_data.merchant_order_id,
             amount=order_data.amount,
-            receipt=f"order_{int(order_data.amount)}"
+            redirect_url=redirect_url,
+            customer_phone=order_data.customer_phone,
+            customer_email=order_data.customer_email
         )
         
-        return {
-            "razorpay_order_id": razorpay_order['id'],
-            "amount": razorpay_order['amount'],
-            "currency": razorpay_order['currency'],
-            "key_id": os.environ.get('RAZORPAY_KEY_ID')
-        }
+        # Extract payment URL from response
+        if phonepe_response.get('success'):
+            payment_url = phonepe_response.get('data', {}).get('instrumentResponse', {}).get('redirectInfo', {}).get('url')
+            
+            return {
+                "success": True,
+                "payment_url": payment_url,
+                "merchant_order_id": order_data.merchant_order_id,
+                "message": "PhonePe order created successfully"
+            }
+        else:
+            error_msg = phonepe_response.get('message', 'Failed to create PhonePe order')
+            logger.error(f"PhonePe order creation failed: {error_msg}")
+            raise HTTPException(status_code=400, detail=error_msg)
+            
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Razorpay order creation failed: {str(e)}")
-        # Fallback to mock for test mode
-        razorpay_order_id = f"order_test_{uuid.uuid4().hex[:10]}"
-        return {
-            "razorpay_order_id": razorpay_order_id,
-            "amount": int(order_data.amount * 100),
-            "currency": "INR",
-            "key_id": os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_1234567890')
-        }
+        logger.error(f"PhonePe order creation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to create PhonePe order: {str(e)}"
+        )
 
-@api_router.post("/razorpay/verify-payment")
-async def verify_razorpay_payment_api(payment_data: RazorpayPaymentVerify):
-    """Verify Razorpay payment signature"""
+@api_router.post("/phonepe/verify-payment")
+async def verify_phonepe_payment_api(payment_data: PhonePePaymentVerify):
+    """Verify PhonePe payment status"""
     try:
-        # Verify signature
-        is_valid = verify_razorpay_signature(
-            razorpay_order_id=payment_data.razorpay_order_id,
-            razorpay_payment_id=payment_data.razorpay_payment_id,
-            razorpay_signature=payment_data.razorpay_signature
+        # Get PhonePe client
+        phonepe_client = get_phonepe_client()
+        
+        # Check payment status
+        status_response = phonepe_client.check_payment_status(
+            merchant_order_id=payment_data.merchant_order_id
         )
         
-        if not is_valid:
-            raise HTTPException(status_code=400, detail="Invalid payment signature")
+        # Parse response
+        if not status_response.get('success'):
+            raise HTTPException(
+                status_code=400, 
+                detail="Failed to verify payment status"
+            )
         
-        # Get order and update status history
+        payload = status_response.get('data', {})
+        payment_state = payload.get('state')
+        
+        # Get order from database
         order = await db.orders.find_one({"id": payment_data.order_id})
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         
-        status_history = order.get("status_history", [])
-        status_history.append({
-            "status": OrderStatus.CONFIRMED.value,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "note": "Payment completed via Razorpay"
-        })
-        
-        # Update order with payment details
-        result = await db.orders.update_one(
-            {"id": payment_data.order_id},
-            {"$set": {
-                "razorpay_order_id": payment_data.razorpay_order_id,
-                "razorpay_payment_id": payment_data.razorpay_payment_id,
-                "razorpay_signature": payment_data.razorpay_signature,
-                "payment_status": PaymentStatus.COMPLETED.value,
+        # Update order based on payment state
+        if payment_state == 'COMPLETED':
+            status_history = order.get("status_history", [])
+            status_history.append({
                 "status": OrderStatus.CONFIRMED.value,
-                "status_history": status_history,
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "note": "Payment completed via PhonePe"
+            })
+            
+            # Update order with payment details
+            await db.orders.update_one(
+                {"id": payment_data.order_id},
+                {"$set": {
+                    "phonepe_merchant_order_id": payment_data.merchant_order_id,
+                    "phonepe_transaction_id": payload.get('transactionId'),
+                    "phonepe_payment_status": payment_state,
+                    "payment_status": PaymentStatus.COMPLETED.value,
+                    "status": OrderStatus.CONFIRMED.value,
+                    "status_history": status_history,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            logger.info(f"Payment completed for order {payment_data.order_id}")
+            return {
+                "success": True,
+                "status": "COMPLETED",
+                "message": "Payment verified successfully"
+            }
         
-        logger.info(f"Payment verified for order {payment_data.order_id}")
-        return {"success": True, "message": "Payment verified successfully"}
+        elif payment_state == 'FAILED':
+            # Update order as failed
+            await db.orders.update_one(
+                {"id": payment_data.order_id},
+                {"$set": {
+                    "phonepe_merchant_order_id": payment_data.merchant_order_id,
+                    "phonepe_payment_status": payment_state,
+                    "payment_status": PaymentStatus.FAILED.value,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            logger.info(f"Payment failed for order {payment_data.order_id}")
+            return {
+                "success": False,
+                "status": "FAILED",
+                "message": "Payment failed"
+            }
+        
+        else:  # PENDING
+            return {
+                "success": False,
+                "status": "PENDING",
+                "message": "Payment is still pending"
+            }
+            
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Payment verification failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Payment verification failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Payment verification failed: {str(e)}"
+        )
+
+@api_router.post("/phonepe/webhook")
+async def phonepe_webhook(
+    webhook_data: PhonePeWebhookPayload,
+    authorization: Optional[str] = None
+):
+    """Handle PhonePe webhook notifications"""
+    try:
+        # Get PhonePe client
+        phonepe_client = get_phonepe_client()
+        
+        # Verify webhook signature
+        if authorization:
+            is_valid = phonepe_client.verify_webhook_signature(authorization)
+            if not is_valid:
+                logger.warning("Invalid webhook signature received")
+                raise HTTPException(status_code=401, detail="Invalid webhook signature")
+        
+        # Process webhook event
+        event_type = webhook_data.event
+        payload = webhook_data.payload
+        
+        logger.info(f"Received PhonePe webhook: {event_type}")
+        
+        if event_type == "checkout.order.completed":
+            # Payment completed
+            merchant_order_id = payload.get('merchantOrderId')
+            transaction_id = payload.get('transactionId')
+            state = payload.get('state')
+            
+            # Find order by merchant_order_id
+            order = await db.orders.find_one({"phonepe_merchant_order_id": merchant_order_id})
+            if order:
+                status_history = order.get("status_history", [])
+                status_history.append({
+                    "status": OrderStatus.CONFIRMED.value,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "note": "Payment completed via PhonePe webhook"
+                })
+                
+                await db.orders.update_one(
+                    {"id": order['id']},
+                    {"$set": {
+                        "phonepe_transaction_id": transaction_id,
+                        "phonepe_payment_status": state,
+                        "payment_status": PaymentStatus.COMPLETED.value,
+                        "status": OrderStatus.CONFIRMED.value,
+                        "status_history": status_history,
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                logger.info(f"Order {order['id']} updated from webhook")
+        
+        elif event_type == "checkout.order.failed":
+            # Payment failed
+            merchant_order_id = payload.get('merchantOrderId')
+            state = payload.get('state')
+            
+            order = await db.orders.find_one({"phonepe_merchant_order_id": merchant_order_id})
+            if order:
+                await db.orders.update_one(
+                    {"id": order['id']},
+                    {"$set": {
+                        "phonepe_payment_status": state,
+                        "payment_status": PaymentStatus.FAILED.value,
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                logger.info(f"Order {order['id']} marked as failed from webhook")
+        
+        return {"success": True, "message": "Webhook processed"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Webhook processing failed: {str(e)}")
+        # Return 200 to prevent PhonePe retries
+        return {"success": False, "message": str(e)}
 
 # ==================== AUTH ROUTES ====================
 

@@ -19,6 +19,7 @@ import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { BulkOrderPage } from "./pages/BulkOrderPage";
 import { MediaGalleryPage } from "./pages/MediaGalleryPage";
 import { OrderSuccessPage } from "./pages/OrderSuccessPage";
+import PaymentStatusPage from "./pages/PaymentStatusPage";
 import { OrderTrackingPage } from "./pages/OrderTrackingPage";
 import { loadCartFromLocalStorage, saveCartToLocalStorage, clearCartFromLocalStorage } from "./utils/cartStorage";
 import { BannerCarousel } from "./components/BannerCarousel";
@@ -1834,6 +1835,7 @@ function App() {
                 <Route path="/track-order" element={<OrderTracking />} />
                 <Route path="/track-order/:orderId" element={<OrderTrackingPage />} />
                 <Route path="/order-success" element={<OrderSuccessPage />} />
+                <Route path="/payment-status" element={<PaymentStatusPage />} />
                 <Route path="/bulk-orders" element={<BulkOrderPage />} />
                 <Route path="/gallery" element={<MediaGalleryPage />} />
                 <Route path="/terms" element={<TermsAndConditions />} />

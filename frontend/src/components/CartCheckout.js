@@ -10,7 +10,7 @@ import { Separator } from './ui/separator';
 import { toast } from 'sonner';
 import { useCart } from '../App';
 import { useAuth } from '../contexts/AuthContext';
-import { RazorpayCheckout } from './RazorpayCheckout';
+import { PhonePeCheckout } from './PhonePeCheckout';
 import { CheckoutSecurityBadge } from './SecurePaymentBadges';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -216,7 +216,7 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
     deliveryType: 'delivery', // 'delivery' or 'pickup'
     
     // Payment Details
-    paymentMethod: 'cod', // cod, razorpay
+    paymentMethod: 'cod', // cod, phonepe
     
     // Coupon
     couponCode: '',
@@ -383,7 +383,7 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
         
         onSuccess();
       }
-      // If Razorpay, the RazorpayCheckout component will handle the payment
+      // If PhonePe, the PhonePeCheckout component will handle the payment
     } catch (error) {
       console.error('Order placement error:', error);
       toast.error(error.response?.data?.detail || 'Failed to place order. Please try again.');
@@ -403,6 +403,20 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
   };
 
   const handleRazorpayFailure = (error) => {
+    console.error('Payment failed:', error);
+    toast.error('Payment failed. Your order is saved, you can retry payment from order history.');
+  };
+  const handlePhonePeSuccess = (paymentResponse) => {
+    toast.success('Payment successful!');
+    
+    setTimeout(() => {
+      window.location.href = `/order-success?orderId=${createdOrderId}`;
+    }, 1500);
+    
+    onSuccess();
+  };
+
+  const handlePhonePeFailure = (error) => {
     console.error('Payment failed:', error);
     toast.error('Payment failed. Your order is saved, you can retry payment from order history.');
   };
@@ -694,14 +708,14 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
                         <input
                           type="radio"
                           name="paymentMethod"
-                          value="razorpay"
-                          checked={formData.paymentMethod === 'razorpay'}
+                          value="phonepe"
+                          checked={formData.paymentMethod === 'phonepe'}
                           onChange={handleChange}
                           className="text-orange-600"
-                          data-testid="razorpay-payment-radio"
+                          data-testid="phonepe-payment-radio"
                         />
                         <div>
-                          <div className="font-medium">Online Payment (Razorpay)</div>
+                          <div className="font-medium">Online Payment (PhonePe)</div>
                           <div className="text-sm text-gray-600">Pay securely with UPI, Cards, Netbanking</div>
                         </div>
                       </label>
@@ -758,7 +772,7 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
                           {loading ? 'Creating Order...' : 'Create Order & Pay'}
                         </Button>
                       ) : (
-                        <RazorpayCheckout
+                        <PhonePeCheckout
                           amount={totalAmount - discount + deliveryCharge}
                           orderId={createdOrderId}
                           userDetails={{
@@ -766,9 +780,9 @@ const CheckoutForm = ({ cartItems, totalAmount, onSuccess }) => {
                             email: formData.email,
                             phone: formData.phone
                           }}
-                          onSuccess={handleRazorpaySuccess}
-                          onFailure={handleRazorpayFailure}
-                          buttonText="Pay Now"
+                          onSuccess={handlePhonePeSuccess}
+                          onFailure={handlePhonePeFailure}
+                          buttonText="Pay Now with PhonePe"
                         />
                       )}
                     </>
