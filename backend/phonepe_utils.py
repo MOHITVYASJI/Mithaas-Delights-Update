@@ -29,7 +29,7 @@ class PhonePeClient:
         
         # Set base URL based on environment
         if self.environment == 'PRODUCTION':
-            self.base_url = 'https://api.phonepe.com/apis'
+            self.base_url = 'https://api.phonepe.com/apis/pg'
             self.auth_url = 'https://api.phonepe.com/apis/identity-manager'
         else:  # SANDBOX/UAT
             self.base_url = 'https://api-preprod.phonepe.com/apis/pg-sandbox'
@@ -60,7 +60,7 @@ class PhonePeClient:
         
         try:
             # Token endpoint
-            token_url = f"{self.auth_url}/oauth2/token"
+            token_url = f"{self.auth_url}/v1/oauth/token"
             
             # Request body (x-www-form-urlencoded)
             data = {
@@ -86,7 +86,7 @@ class PhonePeClient:
             if expires_at:
                 self.token_expiry = expires_at / 1000  # Convert to seconds
             
-            logger.info(f"PhonePe authorization token obtained successfully")
+            logger.info("PhonePe authorization token obtained successfully")
             return self.access_token
             
         except requests.exceptions.RequestException as e:
@@ -102,7 +102,7 @@ class PhonePeClient:
         
         Args:
             payload: Request payload dictionary
-            endpoint: API endpoint path (e.g., '/checkout/v2/pay')
+            endpoint: API endpoint path (e.g., '/v1/pay')
         
         Returns:
             Checksum string in format: hash###salt_index
@@ -120,7 +120,7 @@ class PhonePeClient:
             checksum_hash = hashlib.sha256(checksum_string.encode('utf-8')).hexdigest()
             
             # Return in format: hash###salt_index
-            return f"{checksum_hash}###{ self.salt_index}"
+            return f"{checksum_hash}###{self.salt_index}"
             
         except Exception as e:
             logger.error(f"Error generating checksum: {str(e)}")
@@ -177,7 +177,7 @@ class PhonePeClient:
                     payload["customer"]["email"] = customer_email
             
             # API endpoint
-            endpoint = '/checkout/v2/pay'
+            endpoint = '/v1/pay'
             api_url = f"{self.base_url}{endpoint}"
             
             # Generate checksum
@@ -195,7 +195,7 @@ class PhonePeClient:
             # Headers
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'O-Bearer {token}',
+                'Authorization': f'Bearer {token}',
                 'X-VERIFY': checksum
             }
             
@@ -232,7 +232,7 @@ class PhonePeClient:
             token = self.get_authorization_token()
             
             # API endpoint
-            endpoint = f'/checkout/v2/status/{self.merchant_id}/{merchant_order_id}'
+            endpoint = f'/v1/status/{self.merchant_id}/{merchant_order_id}'
             api_url = f"{self.base_url}{endpoint}"
             
             # Generate checksum for status check (empty payload)
@@ -243,7 +243,7 @@ class PhonePeClient:
             # Headers
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'O-Bearer {token}',
+                'Authorization': f'Bearer {token}',
                 'X-VERIFY': checksum
             }
             
@@ -345,7 +345,7 @@ class PhonePeClient:
             # Headers
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'O-Bearer {token}',
+                'Authorization': f'Bearer {token}',
                 'X-VERIFY': checksum
             }
             

@@ -1943,8 +1943,9 @@ async def create_phonepe_order_api(order_data: PhonePeOrderCreate):
         phonepe_client = get_phonepe_client()
         
         # Generate redirect URL (customer will be redirected here after payment)
-        backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001')
-        redirect_url = f"{backend_url.replace('/api', '')}/payment-status"
+        # Use frontend URL for redirect
+        frontend_url = os.environ.get('FRONTEND_URL', 'https://mithaas-delights.vercel.app')
+        redirect_url = f"{frontend_url}/payment-status"
         
         # Create PhonePe order
         phonepe_response = phonepe_client.create_payment_order(
